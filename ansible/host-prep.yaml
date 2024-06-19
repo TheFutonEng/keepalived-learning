@@ -1,0 +1,6 @@
+---
+- name: Prepare the host to run LXD
+  hosts: lxd-host
+
+  roles:
+    - host-prep

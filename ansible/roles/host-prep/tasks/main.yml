@@ -1,0 +1,43 @@
+---
+# tasks file for host-prep
+
+- name: Check for Snapd
+  command: which snap
+  register: snapd_check
+  ignore_errors: yes
+
+- name: Install snap
+  apt:
+    name: snapd
+    state: latest
+  when: snapd_check.rc != 0
+
+- name: Check if LXD is installed
+  command: snap list lxd
+  register: lxd_check
+  ignore_errors: yes
+
+- name: Install LXD if it is not installed
+  command: snap install lxd
+  when: lxd_check.rc != 0
+
+- name: Refresh LXD if it is installed
+  command: snap refresh lxd
+  when: lxd_check.rc == 0
+
+- name: Check if LXD is initialized
+  stat:
+    path: /var/snap/lxd/common/lxd/database/
+  register: lxd_db
+
+- name: Run lxd init
+  command: lxd init --auto
+  when: not lxd_db.stat.exists
+  notify:
+    - Restart LXD
+
+- name: Ensure LXD service is running
+  service:
+    name: snap.lxd.daemon
+    state: started
+  when: not lxd_db.stat.exists

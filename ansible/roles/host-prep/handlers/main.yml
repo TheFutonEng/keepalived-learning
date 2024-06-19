@@ -1,0 +1,6 @@
+---
+# handlers file for host-prep
+- name: Restart LXD
+  service:
+    name: snap.lxd.daemon
+    state: restarted

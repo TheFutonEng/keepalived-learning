@@ -1,0 +1,4 @@
+---
+# defaults file for host-prep
+
+lxd_user: rmengert

@@ -1,0 +1,13 @@
+all:
+  vars:
+    ansible_connection: ssh
+    ansible_ssh_common_args: -o StrictHostKeyChecking=no
+
+lxd_host:
+  hosts:
+    berkeley.wsp.local:
+
+lxd_vms:
+  hosts:
+    ka01.wsp.local:
+    ka02.wsp.local:
