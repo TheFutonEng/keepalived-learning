@@ -40,6 +40,12 @@ ansible-ping-host: ## Execute an ansible ping against the host
 ansible-ping-vms: ## Execute an ansible ping against the LXD VMs
 	@ansible -b -i ansible/inventory.yaml -m ping lxd_vms
 
+ansible-host-prep: ## Prepare the host operating system
+	@ansible-playbook -b -K -i ansible/inventory.yaml ansible/host-prep.yaml
+
+ansible-docker-vm-install: ## Install docker and start a registry on each VM
+	@ansible-playbook -b -i ansible/inventory.yaml ansible/docker.yaml
+
 ## Help
 help: ## Show this help.
 	@echo ''
@@ -47,6 +53,6 @@ help: ## Show this help.
 	@echo ''
 	@echo 'Targets:'
 	@awk 'BEGIN {FS = ":.*?## "} { \
-		if (/^[a-zA-Z_-]+:.*?##.*$$/) {printf "    ${YELLOW}%-20s${GREEN}%s${RESET}\n", $$1, $$2} \
+		if (/^[a-zA-Z_-]+:.*?##.*$$/) {printf "    ${YELLOW}%-30s${GREEN}%s${RESET}\n", $$1, $$2} \
 		else if (/^## .*$$/) {printf "  ${CYAN}%s${RESET}\n", substr($$1,4)} \
 		}' $(MAKEFILE_LIST)

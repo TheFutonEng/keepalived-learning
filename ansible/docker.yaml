@@ -1,6 +1,6 @@
 ---
 - name: Prepare the host to run LXD
-  hosts: lxd_host
+  hosts: lxd_vms
 
   roles:
-    - host-prep
+    - docker
