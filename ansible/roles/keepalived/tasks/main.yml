@@ -1,0 +1,100 @@
+---
+# tasks file for keepalived
+- name: Install Keepalived via APT
+  block:
+
+    - name: Install keepalived
+      apt:
+        name: keepalived
+        state: present
+
+  when: install_method == 'apt'
+
+- name: Install Keepalived via source
+  block:
+
+    - name: Install prerequisites
+      apt:
+        name:
+          - gcc
+          - libssl-dev
+          - make
+          - wget
+          - tar
+        state: present
+
+    - name: Download Keepalived source code
+      get_url:
+        url: "https://www.keepalived.org/software/keepalived-{{ keepalived_version }}.tar.gz"
+        dest: "/tmp/keepalived-{{ keepalived_version }}.tar.gz"
+
+    - name: Extract Keepalived source code
+      unarchive:
+        src: "/tmp/keepalived-{{ keepalived_version }}.tar.gz"
+        dest: "/tmp"
+        remote_src: yes
+
+    - name: Run configure script
+      command: ./configure
+      args:
+        chdir: "/tmp/keepalived-{{ keepalived_version }}"
+
+    - name: Build Keepalived
+      command: make
+      args:
+        chdir: "/tmp/keepalived-{{ keepalived_version }}"
+
+    - name: Install Keepalived
+      command: make install
+      args:
+        chdir: "/tmp/keepalived-{{ keepalived_version }}"
+
+    - name: Place keepalived.service file on VMs
+      copy:
+        src: files/keepalived.service
+        dest: /lib/systemd/system/keepalived.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - restart systemd
+        - restart keepalived
+
+    - name: Verify Keepalived installation
+      command: keepalived --version
+
+  when: install_method == 'source'
+
+- name: Create /etc/keepalived/scripts directory
+  file:
+    path: /etc/keepalived/scripts
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy custom docker check script to /etc/keepalived/scripts/check_docker_registry.sh
+  copy:
+    src: files/check_docker_registry.sh
+    dest: /etc/keepalived/scripts/check_docker_registry.sh
+    owner: root
+    group: root
+    mode: '0755'
+  notify:
+    - restart keepalived
+
+- name: Copy configuration files to each host
+  template:
+    src: "templates/{{ inventory_hostname }}-keepalived-process.conf.j2"
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart keepalived
+
+- name: restart keepalived
+  systemd:
+    name: keepalived
+    state: restarted
+    enabled: yes

@@ -1,0 +1,24 @@
+vrrp_track_process registry {
+      process registry
+      weight 10
+}
+
+vrrp_instance {{ vrrp_instance }} {
+      state MASTER
+      interface {{ interface }}
+      virtual_router_id {{ virtual_router_id }}
+      priority {{ primary_priority }}
+      advert_int 1
+      authentication {
+            auth_type PASS
+            auth_pass {{ password }}
+      }
+      virtual_ipaddress {
+            {{ virtual_address }}/{{ virtual_netmask }}
+      }
+
+      track_process {
+            registry
+      }
+}
+

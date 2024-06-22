@@ -1,5 +1,18 @@
 ---
 # tasks file for docker
+
+# - name: Wait for SSH to be available on the current node
+#   wait_for:
+#     host: "{{ inventory_hostname }}"
+#     port: 22
+#     delay: 5
+#     timeout: 300
+#     state: started
+#   delegate_to: localhost
+
+# - name: Gather facts after SSH is available
+#   setup:
+
 - name: Ensure old versions of Docker are not installed.
   package:
     name:
@@ -164,7 +177,7 @@
 - name: Copy cert to kit gateway
   copy:
     src: "{{ item }}"
-    dest: "/home/assessor/docker-registry/certs/{{ item | basename }}"
+    dest: "/home/rmengert/docker-registry/certs/{{ item | basename }}"
   loop:
   - files/docker-registry/vp.bigbang.dev.cert
   - files/docker-registry/vp.bigbang.dev.key
@@ -190,7 +203,7 @@
       - "5000:5000"
     volumes:
       - /home/rmengert/docker-registry/auth/:/auth
-      - /home/assessor/docker-registry/certs/:/certs
+      - /home/rmengert/docker-registry/certs/:/certs
       - /home/rmengert/docker-registry/image-storage:/var/lib/registry
     env:
       REGISTRY_AUTH: "htpasswd"

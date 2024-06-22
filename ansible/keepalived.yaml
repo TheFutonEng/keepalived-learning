@@ -1,0 +1,6 @@
+---
+- name: Install keepalived on the VMs
+  hosts: lxd_vms
+
+  roles:
+    - keepalived

@@ -1,0 +1,14 @@
+---
+# defaults file for keepalived
+vrrp_instance: docker
+virtual_router_id: 50
+interface: enp5s0
+virtual_address: 10.196.3.30
+virtual_netmask: 24
+primary_priority: 244
+standby_priority: 245
+password: password
+primary: ka01
+standby: ka02
+install_method: apt
+keepalived_version: "2.3.1"

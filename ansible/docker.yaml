@@ -1,6 +1,7 @@
 ---
-- name: Prepare the host to run LXD
+- name: Prepare the VMs to run Docker
   hosts: lxd_vms
+  # gather_facts: no
 
   roles:
     - docker

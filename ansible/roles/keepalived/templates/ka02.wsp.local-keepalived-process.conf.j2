@@ -1,0 +1,22 @@
+vrrp_track_process registry {
+      process registry
+}
+
+vrrp_instance {{ vrrp_instance }} {
+      state BACKUP
+      interface {{ interface }}
+      virtual_router_id {{ virtual_router_id }}
+      priority {{ standby_priority }}
+      advert_int 1
+      authentication {
+            auth_type PASS
+            auth_pass {{ password }}
+      }
+      virtual_ipaddress {
+            {{ virtual_address }}/{{ virtual_netmask }}
+      }
+
+      track_process {
+            registry
+      }
+}
