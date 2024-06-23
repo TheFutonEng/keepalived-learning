@@ -1,0 +1,11 @@
+---
+# tasks file for storage-sync
+
+- name: Install
+  apt:
+    name:
+      - rsync
+      - inotify-tools
+    state: present
+
+

@@ -1,0 +1,4 @@
+---
+# defaults file for storage-sync
+primary_node: ka01.wsp.local
+secondary_node: ka02.wsp.local

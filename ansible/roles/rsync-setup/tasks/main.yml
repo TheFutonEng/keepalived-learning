@@ -1,0 +1,53 @@
+---
+# tasks file for rsync-setup
+
+- name: Generate SSH key pair for rsync
+  ansible.builtin.openssh_keypair:
+    path: /home/{{ user }}/.ssh/id_rsa
+    type: rsa
+    size: 2048
+  delegate_to: localhost
+  run_once: true
+  become_user: "{{ user }}"
+
+- name: Ensure .ssh directory exists
+  file:
+    path: /home/{{ user }}/.ssh
+    state: directory
+    mode: '0700'
+    owner: "{{ user }}"
+    group: "{{ user }}"
+
+- name: Copy public key to the other node
+  authorized_key:
+    user: "{{ user }}"
+    state: present
+    key: "{{ lookup('file', '/home/{{ user }}/.ssh/id_rsa.pub') }}"
+  delegate_to: "{{ item }}"
+  with_items:
+    - ka01
+    - ka02
+  when: inventory_hostname != item
+
+- name: Resolve hostnames to IP addresses
+  shell: "getent hosts {{ item }} | awk '{ print $1, $2 }'"
+  with_items: "{{ groups['all'] }}"
+  register: resolved_hosts
+
+- name: Create /etc/hosts entries from resolved hosts
+  set_fact:
+    hosts_entries: |
+      {% for host in resolved_hosts.results %}
+      {{ host.stdout }}
+      {% endfor %}
+
+- name: Create /etc/hosts file
+  copy:
+    dest: /etc/hosts
+    content: |
+      127.0.0.1   localhost
+      ::1         localhost ip6-localhost ip6-loopback
+      ff02::1     ip6-allnodes
+      ff02::2     ip6-allrouters
+      {{ hosts_entries }}
+  mode: '0644'
