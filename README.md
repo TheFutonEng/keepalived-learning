@@ -86,3 +86,8 @@ The below series of articles was helpful in getting the keepalived configuration
 - [one](https://www.redhat.com/sysadmin/ha-cluster-linux)
 - [two](https://www.redhat.com/sysadmin/keepalived-basics)
 - [three](https://www.redhat.com/sysadmin/advanced-keepalived)
+
+Other references:
+
+- [Keepalived docs](https://keepalived.readthedocs.io/en/latest/index.html)
+- [LXD docs](https://documentation.ubuntu.com/lxd/en/latest/)
