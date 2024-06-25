@@ -78,3 +78,11 @@ Jun 22 15:09:36 ka02 Keepalived_vrrp[4458]: (docker) Entering MASTER STATE
 Jun 22 15:09:52 ka02 Keepalived_vrrp[4458]: (docker) Master received advert from 10.196.3.1 with higher priority 254, ours 245
 Jun 22 15:09:52 ka02 Keepalived_vrrp[4458]: (docker) Entering BACKUP STATE
 ```
+
+# References
+
+The below series of articles was helpful in getting the keepalived configuration right to track a process:
+
+- [one](https://www.redhat.com/sysadmin/ha-cluster-linux)
+- [two](https://www.redhat.com/sysadmin/keepalived-basics)
+- [three](https://www.redhat.com/sysadmin/advanced-keepalived)
