@@ -57,10 +57,16 @@ ansible-keepalived-apt: ## Install keepalived from apt repos
 ansible-keepalived-src: ## Install keepalived from source
 	@ansible-playbook -b -i ansible/inventory.yaml -e install_method=source ansible/keepalived.yaml
 
-ansible-vm-prep: ansible-docker-vm-install ansible-install-keepalived ## Install docker and keepalived
+ansible-ssh-setup: ## Update /etc/hosts and setup SSH keys
+	@ansible-playbook -b -i ansible/inventory.yaml ansible/ssh.yaml
+
+ansible-storage-setup: ## Setup storage for HA docker registry
+	@ansible-playbook -b -i ansible/inventory.yaml ansible/storage-sync.yaml
+
+ansible-vm-prep: ansible-ssh-setup ansible-docker-vm-install ansible-keepalived-apt ansible-ssh-setup ansible-storage-setup ## Install and configure docker, keepalived, SSH setup and storage synchronization
 
 ## Complete Build
-complete-build: reset-vms ansible-docker-vm-install ansible-keepalived-apt ## Recreate VMs and then deploy docker and keepalived
+complete-build: reset-vms ansible-vm-prep ## Recreate VMs and then deploy docker and keepalived
 
 ## Help
 help: ## Show this help.

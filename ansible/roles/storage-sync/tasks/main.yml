@@ -1,11 +1,93 @@
 ---
 # tasks file for storage-sync
 
-- name: Install
+- name: Install required sychornization tools
   apt:
     name:
       - rsync
       - inotify-tools
     state: present
 
+- name: Set peer_node fact
+  set_fact:
+    peer_node: "{{ 'ka02' if inventory_hostname == 'ka01.wsp.local' else 'ka01' }}"
+
+- name: Create synchronization script
+  template:
+    src: templates/sync_image_storage.sh.j2
+    dest: /usr/local/bin/sync_image_storage.sh
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create synchronization service
+  copy:
+    content: |
+      [Unit]
+      Description=Sync Docker Registry Image Storage Directory
+
+      [Service]
+      User={{ ansible_user }}
+      ExecStart=/usr/local/bin/sync_image_storage.sh
+
+      [Install]
+      WantedBy=default.target
+    dest: /etc/systemd/system/image-storage-sync.service
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Create watch service
+  copy:
+    content: |
+      [Unit]
+      Description=Watch Docker Registry Image Storage Directory
+
+      [Service]
+      User={{ ansible_user }}
+      ExecStart=/bin/bash -c 'while inotifywait -r -e modify,create,delete,move /home/{{ ansible_user }}/docker-registry/image-storage; do /usr/local/bin/sync_image_storage.sh; done'
+
+      [Install]
+      WantedBy=default.target
+    dest: /etc/systemd/system/image-storage-watch.service
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Reload systmd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start synchronization services
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - image-storage-sync.service
+    - image-storage-watch.service
+
+- name: Create notify scripts for keepalived
+  copy:
+    src: files/sync.sh
+    dest: /etc/keepalived/scripts/{{ item }}
+    mode: '0755'
+    owner: root
+    group: root
+  with_items:
+    - notify_master.sh
+    - notify_backup.sh
+    - notify_fault.sh
+
+- name: Modify keepalived configuration in place
+  blockinfile:
+    path: /etc/keepalived/keepalived.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      \tnotify_master "/etc/keepalived/scripts/notify_master.sh"
+      \tnotify_backup "/etc/keepalived/scripts/notify_backup.sh"
+      \tnotify_fault "/etc/keepalived/scripts/notify_fault.sh"
+    insertafter: "^vrrp_instance docker"
+  notify:
+    - restart keepalived
 

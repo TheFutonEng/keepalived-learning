@@ -2,7 +2,7 @@
 # handlers file for keepalived
 - name: restart keepalived
   service:
-    name: docker
+    name: keepalived
     state: restarted
 
 - name: Reload systemd

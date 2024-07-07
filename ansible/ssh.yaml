@@ -1,0 +1,5 @@
+---
+- name: Prepare the VMs to run Docker
+  hosts: lxd_vms
+  roles:
+    - ssh-setup

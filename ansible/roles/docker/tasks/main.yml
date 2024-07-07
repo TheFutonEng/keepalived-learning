@@ -211,3 +211,5 @@
       REGISTRY_AUTH_HTPASSWD_PATH: "/auth/creds"
       REGISTRY_HTTP_TLS_CERTIFICATE: "/certs/vp.bigbang.dev.cert"
       REGISTRY_HTTP_TLS_KEY: "/certs/vp.bigbang.dev.key"
+
+

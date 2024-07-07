@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Define the source and destination directories
+SOURCE_DIR="/home/{{ ansible_user }}/docker-registry/image-storage/"
+DEST_NODE="{{ peer_node }}" # Change this to the appropriate node hostname or IP
+DEST_DIR="/home/rmengert/docker-registry/image-storage/"
+
+# Use rsync to synchronize the directories
+rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --delete $SOURCE_DIR ${DEST_NODE}:${DEST_DIR}

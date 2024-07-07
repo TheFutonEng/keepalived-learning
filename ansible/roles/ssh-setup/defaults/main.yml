@@ -1,0 +1,4 @@
+---
+# defaults file for ssh-setup
+
+ansible_user: rmengert

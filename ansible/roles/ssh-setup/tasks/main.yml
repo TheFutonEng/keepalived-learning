@@ -1,0 +1,38 @@
+---
+# tasks file for ssh-setup
+
+- name: Add /etc/hosts entries for all hosts in inventory file
+  lineinfile:
+    dest: /etc/hosts
+    regexp: "^{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
+    line: "{{ hostvars[item]['ansible_default_ipv4']['address'] }} {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['ansible_hostname'] }}.wsp.local"
+    insertafter: '^127\.0\.1\.1'
+    state: present
+  with_items: "{{ groups['lxd_vms'] }}"
+  when: hostvars[item]['ansible_hostname'] != ansible_hostname
+
+- name: Ensure SSH directory exists
+  file:
+    path: /home/{{ ansible_user }}/.ssh
+    state: directory
+    mode: '0700'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Generate SSH key pair if not present
+  become_user: "{{ ansible_user }}"
+  command: ssh-keygen -t rsa -b 4096 -f /home/{{ ansible_user }}/.ssh/id_rsa -N ""
+  args:
+    creates: /home/{{ ansible_user }}/.ssh/id_rsa
+
+- name: Read the public key
+  slurp:
+    src: /home/{{ ansible_user }}/.ssh/id_rsa.pub
+  register: ssh_pub_keys
+
+- name: Set up authorized_keys for each host
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ item.content | b64decode }}"
+  with_items: "{{ hostvars | dict2items | selectattr('key', 'in', groups['lxd_vms']) | map(attribute='value.ssh_pub_keys') | list }}"
+

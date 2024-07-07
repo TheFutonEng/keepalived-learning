@@ -1,0 +1,5 @@
+---
+- name: Prepare the VMs to run storage synchronization
+  hosts: lxd_vms
+  roles:
+    - storage-sync
